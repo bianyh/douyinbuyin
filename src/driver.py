@@ -28,7 +28,7 @@ class Driver:
         options.page_load_strategy = 'eager'
         options.add_argument("--mute-audio")
 
-        # options.add_argument('--headless')
+        options.add_argument('--headless')
 
         # options.add_experimental_option('excludeSwitches', ['enable-automation'])
         # options.add_experimental_option('useAutomationExtension', False)
