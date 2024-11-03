@@ -28,7 +28,7 @@ class Driver:
         options.page_load_strategy = 'eager'
         options.add_argument("--mute-audio")
 
-        options.add_argument('--headless')
+        # options.add_argument('--headless')
 
         # options.add_experimental_option('excludeSwitches', ['enable-automation'])
         # options.add_experimental_option('useAutomationExtension', False)
@@ -72,6 +72,14 @@ class Driver:
         try:
             span_element = WebDriverWait(self.driver, 10).until(
                 EC.element_to_be_clickable((By.XPATH, f"(//{type}[contains(text(), '{name}')])[{section}]")))
+            return span_element
+        except Exception as e:
+            logger.error(f"发生错误：{e}")
+
+    def get_element_with_any(self, type, what, name, section=1):
+        try:
+            span_element = WebDriverWait(self.driver, 10).until(
+                EC.element_to_be_clickable((By.XPATH, f"(//{type}[contains(@{what}, '{name}')])[{section}]")))
             return span_element
         except Exception as e:
             logger.error(f"发生错误：{e}")
@@ -129,6 +137,27 @@ class Driver:
         except Exception as e:
             logger.error(f"发生错误：{e}")
 
+    def click_button_and_jump_with_any(self, type, what, button_selector, section=1):
+        # 生成一个0.1到0.2之间的随机浮点数
+        delay = random.uniform(0.1, 0.2)
+
+        # 打印延迟时间
+        print(f"Delaying for {delay} seconds...")
+
+        # 延迟指定的时间
+        time.sleep(delay)
+
+        try:
+            button = self.get_element_with_any(type,what, button_selector, section)
+            button.click()
+            logger.info("已点击按钮")
+            WebDriverWait(self.driver, 10).until(lambda driver: len(driver.window_handles) > 1)
+            new_window_handles = self.driver.window_handles[1:]
+            self.driver.switch_to.window(new_window_handles[-1])
+            logger.info("已切换到新标签页")
+        except Exception as e:
+            logger.error(f"发生错误：{e}")
+
     def click_button(self, type, button_selector, section=1):
         # 生成一个0.1到0.2之间的随机浮点数
         delay = random.uniform(0.1, 0.2)
@@ -141,6 +170,23 @@ class Driver:
 
         try:
             span_element = self.get_element_with_class(type, button_selector, section)
+            span_element.click()
+            logger.info("已点击按钮")
+        except Exception as e:
+            logger.error(f"发生错误：{e}")
+
+    def click_button_with_any(self, type, what, button_selector, section=1):
+        # 生成一个0.1到0.2之间的随机浮点数
+        delay = random.uniform(0.1, 0.2)
+
+        # 打印延迟时间
+        logger.info(f"Delaying for {delay} seconds...")
+
+        # 延迟指定的时间
+        time.sleep(delay)
+
+        try:
+            span_element = self.get_element_with_any(type,what, button_selector, section)
             span_element.click()
             logger.info("已点击按钮")
         except Exception as e:
@@ -171,6 +217,15 @@ class Driver:
         except Exception as e:
             logger.error(f"发生错误：{e}")
             return None
+    def get_text_with_any(self, type,what, where_text, section=1):
+        try:
+            element = self.get_element_with_any(type,what, where_text, section)
+            logger.info(f"获取到文本：{element.text}")
+            return element.text
+        except Exception as e:
+            logger.error(f"发生错误：{e}")
+            return None
+
 
     def find_elements_with_full_xpath(self, where_to_find, what_to_find='src', section=1):
         try:
@@ -180,6 +235,7 @@ class Driver:
             return video_link
         except Exception as e:
             logger.error(f"发生错误：{e}")
+
 
     def find_elements(self, type, where_to_find, what_to_find='src', section=1):
         try:
@@ -191,9 +247,31 @@ class Driver:
         except Exception as e:
             logger.error(f"发生错误：{e}")
 
+    def find_elements_with_any(self, type,what, where_to_find, what_to_find='src', section=1):
+        try:
+            span_element = self.get_element_with_any(type,what, where_to_find, section)
+            video_element = span_element.find_element(By.TAG_NAME, "video")
+            video_src = video_element.get_attribute(what_to_find)
+            logger.info(video_src)
+            return video_src
+        except Exception as e:
+            logger.error(f"发生错误：{e}")
+
     def move_and_wait(self, type, where_to_move, section=1):
         try:
             span_element = self.get_element_with_class(type, where_to_move, section)
+            # 创建ActionChains实例
+            actions = ActionChains(self.driver)
+
+            # 移动鼠标到元素上并悬停
+            actions.move_to_element(span_element).perform()
+            return
+        except Exception as e:
+            logger.error(f"发生错误：{e}")
+
+    def move_and_wait_with_any(self, type,what, where_to_move, section=1):
+        try:
+            span_element = self.get_element_with_any(type,what, where_to_move, section)
             # 创建ActionChains实例
             actions = ActionChains(self.driver)
 
